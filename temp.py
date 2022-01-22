@@ -8,10 +8,11 @@ import nltk
 import random
 from nltk.stem.lancaster import LancasterStemmer
 
-global stemmer,model,data
-stemmer= LancasterStemmer()
+
+
 
 def train():
+  stemmer= LancasterStemmer()  
   ops.reset_default_graph()
   words=[]
   docx=[]
@@ -63,7 +64,7 @@ def train():
   model.fit(training, output, n_epoch=1000, batch_size=8, show_metric=True)
   model.save('model.tflearn')
 
-def bag_of_words(s,words):
+def bag_of_words(s,words,stemmer):
     bag=[0 for _ in range(len(words))]
 
     s_words = nltk.word_tokenize(s)
@@ -75,7 +76,7 @@ def bag_of_words(s,words):
                 bag[i]=1
     return np.array(bag)
 
-def chat(inp): 
+def chat(inp,model,words,labels,data): 
   results = model.predict([bag_of_words(inp, words)])[0]
   results_index = np.argmax(results)
   tag = labels[results_index]
@@ -84,3 +85,4 @@ def chat(inp):
       if tg ['tag'] == tag: 
         responses = tg['responses']
     return random.choice(responses)
+
