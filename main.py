@@ -76,7 +76,7 @@ model = tflearn.DNN(net)
 model.fit(training, output, n_epoch=1000, batch_size=8, show_metric=True)
 model.save('model.tflearn')
 
-################################################
+###############################################
 @client.event
 async def on_ready():
     print(f'{client.user} has connected to Discord!')
