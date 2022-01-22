@@ -81,4 +81,4 @@ def chat(inp,model,words,labels,data,stemmer):
       if tg ['tag'] == tag: 
         responses = tg['responses']
     return random.choice(responses)
-
+#
