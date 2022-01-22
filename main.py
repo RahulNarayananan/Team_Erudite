@@ -3,11 +3,15 @@ from discord.ext import commands
 import music
 import os
 import random 
+import json
+import requests
+from keys import *
 
-TOKEN = os.environ['DISCORD_TOKEN']
+# TOKEN = os.environ['DISCORD_TOKEN']
 GUILD = os.getenv('DISCORD_GUILD')
-client =   commands.Bot(command_prefix = '?',intents = discord.Intents.all())
-
+intents=discord.Intents.all()
+intents.members=True
+client = commands.Bot(command_prefix = "?",intents=intents)
 cogs = [music]
 
 for i in range(len(cogs)):
@@ -20,7 +24,21 @@ async def on_ready():
 
 @client.event
 async def on_member_join(member):
-    await member.send(f"Welcome to Erudite")
+
+    quoteurl = "https://quotes-inspirational-quotes-motivational-quotes.p.rapidapi.com/quote"
+
+    querystring = {"token":"ipworld.info"}
+
+    headers = {
+        'x-rapidapi-host': "quotes-inspirational-quotes-motivational-quotes.p.rapidapi.com",
+        'x-rapidapi-key': xrapidkey
+        }
+
+    response = requests.request("GET", quoteurl, headers=headers, params=querystring)
+
+    await member.send(f"Welcome")
+    await member.send(json.loads(response.text)['text'])
+
 
 ###############################
 
