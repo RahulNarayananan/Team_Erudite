@@ -5,9 +5,8 @@ import os
 import random 
 import json
 import requests
-from keys import *
 
-# TOKEN = os.environ['DISCORD_TOKEN']
+TOKEN = os.environ['DISCORD_TOKEN']
 GUILD = os.getenv('DISCORD_GUILD')
 intents=discord.Intents.all()
 intents.members=True
