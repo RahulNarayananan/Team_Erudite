@@ -5,6 +5,13 @@ import os
 import random 
 import json
 import requests
+import tensorflow as tf  
+import tflearn
+from tensorflow.python.framework import ops
+import numpy as np
+import nltk
+from nltk.stem.lancaster import LancasterStemmer
+import model as MODEL
 
 TOKEN = os.environ['DISCORD_TOKEN']
 GUILD = os.getenv('DISCORD_GUILD')
@@ -15,6 +22,59 @@ cogs = [music]
 
 for i in range(len(cogs)):
   cogs[i].setup(client)
+
+
+stemmer= LancasterStemmer()  
+ops.reset_default_graph()
+words=[]
+docx=[]
+docy=[]
+labels=[]
+f=open('intents.json')
+data=json.load(f)
+for intent in data['intents']:
+    for pattern in intent["patterns"]:
+        wrds= nltk.word_tokenize(pattern)
+        words.extend(wrds)
+        docx.append(wrds)
+        docy.append(intent['tag'])
+    
+    if intent["tag"] not in labels:
+        labels.append(intent['tag'])
+words = [stemmer.stem(w.lower()) for w in words if w not in "?" ]
+words= sorted(list(set(words)))
+
+labels=sorted(labels)
+training=[]
+output=[]
+
+out_empty=[0 for _ in range(len(labels))]
+
+for x, doc in enumerate(docx):
+    bag=[]
+    wrds=[stemmer.stem(w) for w in doc]
+    for w in words:
+        if w in wrds:
+            bag.append(1)
+        else:
+            bag.append(0)
+    output_row=out_empty[:]
+    output_row[labels.index(docy[x])]=1
+
+    training.append(bag)
+    output.append(output_row)
+
+training=np.array(training)
+output= np.array(output)
+
+net = tflearn.input_data(shape=[None, len(training[0])])
+net = tflearn.fully_connected(net, 8)
+net = tflearn.fully_connected(net, 8)
+net = tflearn.fully_connected(net, len(output[0]), activation='softmax')
+net = tflearn.regression(net)
+model = tflearn.DNN(net)
+model.fit(training, output, n_epoch=1000, batch_size=8, show_metric=True)
+model.save('model.tflearn')
 
 ################################################
 @client.event
@@ -103,47 +163,52 @@ async def on_message(message):
     if message.author == client.user:
       return
 
-    if 'kys' in message.content.lower():
+    if message.channel.id == 934534628604260413:
+      response = MODEL.chat(message.content.lower(),model,words,labels,data,stemmer)
+      await message.channel.send(response)
+
+    else:
+      if 'kys' in message.content.lower():
         response = "That is not appropriate to say to anyone. Please watch your language."
         await message.channel.send(response)
 
-    if 'faggot' in message.content.lower():
+      if 'faggot' in message.content.lower():
         response = "That is not appropriate to say to anyone. Please watch your language."
         await message.channel.send(response)
 
-    if 'fag' in message.content.lower():
+      if 'fag' in message.content.lower():
         response = "That is not appropriate to say to anyone. Please watch your language."
         await message.channel.send(response)
 
-    if 'fuck' in message.content.lower():
+      if 'fuck' in message.content.lower():
         response ="That is not appropriate to say to anyone. Please watch your language."
         await message.channel.send(response)
 
-    if 'nigger' in message.content.lower():
+      if 'nigger' in message.content.lower():
         response = "That is not appropriate to say to anyone. Please watch your language."
         await message.channel.send(response)
 
-    if 'nigga' in message.content.lower():
+      if 'nigga' in message.content.lower():
         response = "That is not appropriate to say to anyone. Please watch your language."
         await message.channel.send(response)
 
-    if 'kill urself' in message.content.lower():
+      if 'kill urself' in message.content.lower():
         response = "That is not appropriate to say to anyone. Please watch your language."
         await message.channel.send(response)
 
-    if 'kill yourself' in message.content.lower():
+      if 'kill yourself' in message.content.lower():
         response = "That is not appropriate to say to anyone. Please watch your language."
         await message.channel.send(response)
 
-    if 'kms' in message.content.lower():
+      if 'kms' in message.content.lower():
         response = "Help is available, speak with a counselor today by calling the National Suicide Prevention Lifeline at 800-273-8255"
         await message.channel.send(response)
 
-    if 'kill my self' in message.content.lower():
+      if 'kill my self' in message.content.lower():
         response = "Help is available, speak with a counselor today by calling the National Suicide Prevention Lifeline at 800-273-8255"
         await message.channel.send(response)
 
-    if 'suicide' in message.content.lower():
+      if 'suicide' in message.content.lower():
         response = "Help is available, Speak with a counselor today by calling the National Suicide Prevention Lifeline at 800-273-8255"
         await message.channel.send(response)
 
